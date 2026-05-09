@@ -1,0 +1,18 @@
+<launch>
+  <!-- 1. 加载机器人模型参数 -->
+  <param name="robot_description" command="$(find xacro)/xacro '$(find my_ackermann_robot)/urdf/car.xacro'" />
+
+  <!-- 2. 启动 Gazebo 空白世界 -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+  </include>
+
+  <!-- 3. 在 Gazebo 中生成模型 (放置在 z=0.2 避免卡在地板里) -->
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" 
+        args="-param robot_description -urdf -model my_ackermann_car -z 0.25" />
+
+  <!-- 4. 发布关节状态和机器人状态 (用于可视化) -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+</launch>
