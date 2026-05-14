@@ -16,6 +16,6 @@ docker run -it \
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
     -v /dev/dri:/dev/dri \
-    -v $(pwd)/src:/root/colcon/src \
+    -v $(pwd)/src:/root/colcon_ws/src \
     gazebo_img \
     /bin/bash
