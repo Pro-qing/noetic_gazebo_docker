@@ -8,4 +8,11 @@
   <!-- 3. 将模型放入 Gazebo -->
   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" 
         args="-param robot_description -urdf -model my_robot" />
+
+    <!-- 读取 urdf 文件并发布 TF -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+    <!-- 发布关节状态 (因为你有轮子关节) -->
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+
 </launch>
