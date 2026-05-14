@@ -7,6 +7,9 @@ RUN apt-get update && apt-get install -y \
     ros-noetic-gazebo-ros-pkgs \
     ros-noetic-gazebo-ros-control \
     python3-colcon-common-extensions \
+    ros-noetic-velodyne-simulator \
+    ros-noetic-velodyne-description \ 
+    ros-noetic-velodyne-gazebo-plugins \
     && rm -rf /var/lib/apt/lists/*
 
 # 设置工作目录
