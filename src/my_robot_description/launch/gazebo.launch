@@ -12,7 +12,7 @@
     <!-- 读取 urdf 文件并发布 TF -->
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
 
-    <!-- 发布关节状态 (因为你有轮子关节) -->
+    <!-- 发布关节状态  -->
     <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
 
 </launch>
