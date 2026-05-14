@@ -6,7 +6,8 @@ RUN apt-get update && apt-get install -y \
     python3-catkin-tools \
     ros-noetic-gazebo-ros-pkgs \
     ros-noetic-gazebo-ros-control \
+    python3-colcon-common-extensions \
     && rm -rf /var/lib/apt/lists/*
 
 # 设置工作目录
-WORKDIR /root/catkin_ws
+WORKDIR /root/colcon_ws
