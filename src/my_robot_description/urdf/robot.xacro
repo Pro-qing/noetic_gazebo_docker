@@ -3,7 +3,7 @@
 
   <!-- 参数定义 -->
   <xacro:property name="base_width" value="0.4"/>
-  <xacro:property name="base_length" value="0.5"/>
+  <xacro:property name="base_length" value="1.0"/>
   <xacro:property name="wheel_radius" value="0.1"/>
   <xacro:property name="wheel_width" value="0.05"/>
 
@@ -47,7 +47,7 @@
     <joint name="${prefix}_wheel_joint" type="continuous">
       <parent link="base_link"/>
       <child link="${prefix}_wheel"/>
-      <origin xyz="-0.05 ${reflect * (base_width/2 + wheel_width/2)} -0.05" rpy="-1.57 0 0"/>
+      <origin xyz="-0.2 ${reflect * (base_width/2 + wheel_width/2)} -0.05" rpy="-1.57 0 0"/>
       <axis xyz="0 0 1"/>
     </joint>
   </xacro:macro>
@@ -72,7 +72,7 @@
   <joint name="caster_joint" type="fixed">
     <parent link="base_link"/>
     <child link="caster_wheel"/>
-    <origin xyz="0.2 0 -0.1" rpy="0 0 0"/>
+    <origin xyz="0.4 0 -0.1" rpy="0 0 0"/>
   </joint>
 
   <!-- 给万向轮设置摩擦力 (Gazebo 专用) -->
@@ -85,6 +85,7 @@
   <gazebo>
     <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
       <legacyMode>false</legacyMode>
+      <rosDebugLevel>na</rosDebugLevel> 
       <alwaysOn>true</alwaysOn>
       <updateRate>20</updateRate>
       <leftJoint>left_wheel_joint</leftJoint>
@@ -96,6 +97,14 @@
       <odometryTopic>odom</odometryTopic>
       <odometryFrame>odom</odometryFrame>
       <robotBaseFrame>base_link</robotBaseFrame>
+      <!-- 补充这些参数 -->
+      <publishWheelTF>true</publishWheelTF>
+      <publishOdomTF>true</publishOdomTF>
+      <publishWheelJointState>true</publishWheelJointState>
+      <wheelAcceleration>1.0</wheelAcceleration>
+      <wheelTorque>20</wheelTorque>
+      <odometrySource>world</odometrySource>
+      <publishTf>1</publishTf>
     </plugin>
   </gazebo>
 
