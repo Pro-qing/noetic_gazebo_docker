@@ -138,15 +138,8 @@
   <!-- 1. 引入 Livox Mid-360 的宏定义文件 -->
   <xacro:include filename="$(find livox_laser_simulation)/urdf/livox_mid360.xacro"/>
 
-  <!-- 2. 调用宏生成雷达 -->
-  <xacro:Livox_Mid40 name="livox"/>
-
-  <!-- 3. 手动创建一个关节，把雷达绑在小车上 -->
-  <joint name="laser_livox_bridge_joint" type="fixed">
-    <parent link="base_link"/>
-    <child link="livox_base"/>
-    <origin xyz="0.45 0.0 0.45" rpy="0 0 0" />
-  </joint>
+  <!-- 2. 调用宏生成雷达 (直接指定 parent 和安装位置) -->
+  <xacro:Livox_Mid40 name="livox" parent="base_link" xyz="0.45 0 0.45" rpy="3.1415926 0 0"/>
 
   <!-- 3. Gazebo 差速驱动插件 -->
   <gazebo>
@@ -165,7 +158,7 @@
       <odometryFrame>odom</odometryFrame>
       <robotBaseFrame>base_link</robotBaseFrame>
       <!-- 补充这些参数 -->
-      <publishWheelTF>true</publishWheelTF>
+      <publishWheelTF>false</publishWheelTF>
       <publishOdomTF>true</publishOdomTF>
       <publishWheelJointState>true</publishWheelJointState>
       <wheelAcceleration>1.0</wheelAcceleration>
