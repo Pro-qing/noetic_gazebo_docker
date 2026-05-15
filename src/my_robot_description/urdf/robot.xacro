@@ -142,7 +142,6 @@
   <xacro:Livox_Mid40 name="livox"/>
 
   <!-- 3. 手动创建一个关节，把雷达绑在小车上 -->
-  <!-- 注意：Livox 生成的基座 link 名字通常是 "你的name参数_base"，也就是 "livox_base" -->
   <joint name="laser_livox_bridge_joint" type="fixed">
     <parent link="base_link"/>
     <child link="livox_base"/>
