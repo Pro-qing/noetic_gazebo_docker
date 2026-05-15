@@ -1,0 +1,115 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <world name="default">
+    <!-- 基础环境：地面和光源 -->
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <!-- 1. 封闭场所 (10m x 10m) -->
+    <!-- 我们用四个墙组成，确保厚度足够，激光不会穿透 -->
+    <model name="room_walls">
+      <static>true</static>
+      <link name="link">
+        <!-- 北墙 -->
+        <collision name="north">
+          <pose>5 0 0.5 0 0 0</pose>
+          <geometry><box><size>0.1 10 1</size></box></geometry>
+        </collision>
+        <visual name="north_v">
+          <pose>5 0 0.5 0 0 0</pose>
+          <geometry><box><size>0.1 10 1</size></box></geometry>
+          <material><script><name>Gazebo/Grey</name></script></material>
+        </visual>
+        <!-- 南墙 -->
+        <collision name="south">
+          <pose>-5 0 0.5 0 0 0</pose>
+          <geometry><box><size>0.1 10 1</size></box></geometry>
+        </collision>
+        <visual name="south_v">
+          <pose>-5 0 0.5 0 0 0</pose>
+          <geometry><box><size>0.1 10 1</size></box></geometry>
+        </visual>
+        <!-- 东墙 -->
+        <collision name="east">
+          <pose>0 5 0.5 0 0 0</pose>
+          <geometry><box><size>10 0.1 1</size></box></geometry>
+        </collision>
+        <visual name="east_v">
+          <pose>0 5 0.5 0 0 0</pose>
+          <geometry><box><size>10 0.1 1</size></box></geometry>
+        </visual>
+        <!-- 西墙 -->
+        <collision name="west">
+          <pose>0 -5 0.5 0 0 0</pose>
+          <geometry><box><size>10 0.1 1</size></box></geometry>
+        </collision>
+        <visual name="west_v">
+          <pose>0 -5 0.5 0 0 0</pose>
+          <geometry><box><size>10 0.1 1</size></box></geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 2. 动态物体 (沿着固定路线移动的方块) -->
+    <model name="moving_obstacle">
+      <pose>0 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.5 0.5 1</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.5 0.5 1</size></box></geometry>
+          <material><script><name>Gazebo/Red</name></script></material>
+        </visual>
+      </link>
+      <!-- 使用内置插件实现往复运动 -->
+      <plugin name="push_animate" filename="libanimated_box.so"/>
+      <script>
+        <loop>true</loop>
+        <delay_start>0</delay_start>
+        <auto_start>true</auto_start>
+        <trajectory id="0" type="linear">
+           <waypoint><time>0.0</time><pose>-3 -3 0.5 0 0 0</pose></waypoint>
+           <waypoint><time>5.0</time><pose>3 -3 0.5 0 0 0</pose></waypoint>
+           <waypoint><time>10.0</time><pose>3 3 0.5 0 0 0</pose></waypoint>
+           <waypoint><time>15.0</time><pose>-3 3 0.5 0 0 0</pose></waypoint>
+           <waypoint><time>20.0</time><pose>-3 -3 0.5 0 0 0</pose></waypoint>
+        </trajectory>
+      </script>
+    </model>
+
+    <!-- 3. 两个静态圆柱体 (R=0.3, H=0.3) -->
+    <model name="cylinder_1">
+      <static>true</static>
+      <pose>2 0 0.15 0 0 0</pose> <!-- 只要 Z=H/2 就在地面上 -->
+      <link name="link">
+        <collision name="col">
+          <geometry><cylinder><radius>0.3</radius><length>0.3</length></cylinder></geometry>
+        </collision>
+        <visual name="vis">
+          <geometry><cylinder><radius>0.3</radius><length>0.3</length></cylinder></geometry>
+          <material><script><name>Gazebo/Blue</name></script></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="cylinder_2">
+      <static>true</static>
+      <pose>-2 1 0.15 0 0 0</pose>
+      <link name="link">
+        <collision name="col">
+          <geometry><cylinder><radius>0.3</radius><length>0.3</length></cylinder></geometry>
+        </collision>
+        <visual name="vis">
+          <geometry><cylinder><radius>0.3</radius><length>0.3</length></cylinder></geometry>
+          <material><script><name>Gazebo/Blue</name></script></material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>
