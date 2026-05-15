@@ -139,15 +139,14 @@
   <xacro:include filename="$(find livox_laser_simulation)/urdf/livox_mid360.xacro"/>
 
   <!-- 2. 调用宏生成雷达 -->
-  <!-- 假设第一步查出来的宏名字叫 Livox_Mid_360，如果查出来叫别的，请把这里替换掉 -->
   <xacro:Livox_Mid40 name="livox"/>
 
   <!-- 3. 手动创建一个关节，把雷达绑在小车上 -->
   <!-- 注意：Livox 生成的基座 link 名字通常是 "你的name参数_base"，也就是 "livox_base" -->
-  <joint name="livox_mount_joint" type="fixed">
+  <joint name="laser_livox_bridge_joint" type="fixed">
     <parent link="base_link"/>
     <child link="livox_base"/>
-    <origin xyz="0.45 0.0 0.08" rpy="0 0 0" />
+    <origin xyz="0.45 0.0 0.45" rpy="0 0 0" />
   </joint>
 
   <!-- 3. Gazebo 差速驱动插件 -->

@@ -59,7 +59,7 @@ install(DIRECTORY include/${PROJECT_NAME}/
 
 # 3. 安装运行所需的资源文件夹 (launch, urdf, meshes, rviz, worlds 等)
 # 加入 OPTIONAL 是为了防止你本地缺少某个文件夹时 CMake 报错
-install(DIRECTORY launch urdf meshes rviz worlds
+install(DIRECTORY launch urdf meshes rviz worlds scan_mode
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   OPTIONAL
 )
