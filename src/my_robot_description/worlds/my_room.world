@@ -1,0 +1,97 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <world name="default">
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <!-- 1. 封闭场所 (10m x 10m) -->
+    <model name="room_walls">
+      <static>true</static>
+      <link name="link">
+        <collision name="north"><pose>5 0 0.5 0 0 0</pose><geometry><box><size>0.1 10 1</size></box></geometry></collision>
+        <visual name="north_v"><pose>5 0 0.5 0 0 0</pose><geometry><box><size>0.1 10 1</size></box></geometry><material><script><name>Gazebo/Grey</name></script></material></visual>
+        <collision name="south"><pose>-5 0 0.5 0 0 0</pose><geometry><box><size>0.1 10 1</size></box></geometry></collision>
+        <visual name="south_v"><pose>-5 0 0.5 0 0 0</pose><geometry><box><size>0.1 10 1</size></box></geometry></visual>
+        <collision name="east"><pose>0 5 0.5 0 0 0</pose><geometry><box><size>10 0.1 1</size></box></geometry></collision>
+        <visual name="east_v"><pose>0 5 0.5 0 0 0</pose><geometry><box><size>10 0.1 1</size></box></geometry></visual>
+        <collision name="west"><pose>0 -5 0.5 0 0 0</pose><geometry><box><size>10 0.1 1</size></box></geometry></collision>
+        <visual name="west_v"><pose>0 -5 0.5 0 0 0</pose><geometry><box><size>10 0.1 1</size></box></geometry></visual>
+      </link>
+    </model>
+
+    <!-- 2. 动态物体 (匀速运动的长方体) -->
+    <!-- 关键修改：将 model 改为 actor -->
+    <actor name="moving_obstacle">
+      <!-- actor 默认不受重力影响并按脚本移动，不需要 static 标签 -->
+      <pose>2.5 2.5 0.75 0 0 0</pose>
+
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.3 0.3 1.5</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.3 0.3 1.5</size></box></geometry>
+          <material>
+            <script>
+              <name>Gazebo/Red</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+
+      <!-- script 路径动画只对 actor 生效 -->
+      <script>
+        <loop>true</loop>
+        <delay_start>0</delay_start>
+        <auto_start>true</auto_start>
+        <trajectory id="0" type="linear">
+           <!-- 匀速逻辑：每段路程 5.0m，给定相同的时间间隔(5s)实现 1m/s 的匀速 -->
+           <waypoint>
+             <time>0.0</time>
+             <pose>2.5 2.5 0.75 0 0 0</pose>
+           </waypoint>
+           <waypoint>
+             <time>5.0</time>
+             <pose>2.5 -2.5 0.75 0 0 0</pose>
+           </waypoint>
+           <waypoint>
+             <time>10.0</time>
+             <pose>-2.5 -2.5 0.75 0 0 0</pose>
+           </waypoint>
+           <waypoint>
+             <time>15.0</time>
+             <pose>-2.5 2.5 0.75 0 0 0</pose>
+           </waypoint>
+           <waypoint>
+             <time>20.0</time>
+             <pose>2.5 2.5 0.75 0 0 0</pose>
+           </waypoint>
+        </trajectory>
+      </script>
+    </actor>
+
+    <!-- 3. 静态圆柱体 -->
+    <model name="cylinder_1">
+      <static>true</static>
+      <pose>1 1 0.15 0 0 0</pose> 
+      <link name="link">
+        <collision name="col"><geometry><cylinder><radius>0.3</radius><length>0.3</length></cylinder></geometry></collision>
+        <visual name="vis"><geometry><cylinder><radius>0.3</radius><length>0.3</length></cylinder></geometry><material><script><name>Gazebo/Blue</name></script></material></visual>
+      </link>
+    </model>
+
+    <model name="cylinder_2">
+      <static>true</static>
+      <pose>-1 -2 0.15 0 0 0</pose>
+      <link name="link">
+        <collision name="col"><geometry><cylinder><radius>0.3</radius><length>0.3</length></cylinder></geometry></collision>
+        <visual name="vis"><geometry><cylinder><radius>0.3</radius><length>0.3</length></cylinder></geometry><material><script><name>Gazebo/Blue</name></script></material></visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

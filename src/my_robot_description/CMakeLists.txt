@@ -200,8 +200,8 @@ install(DIRECTORY launch/
 )
 
 #  urdf、meshes、rviz 等文件夹，也要一并安装
-install(DIRECTORY urdf/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
+install(DIRECTORY urdf worlds
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
 #############
