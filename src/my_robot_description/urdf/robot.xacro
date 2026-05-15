@@ -132,7 +132,7 @@
 
   <!-- 显式传入参数 -->
   <VLP-16 parent="base_link" name="velodyne" topic="/velodyne_points" hz="10" samples="440" gpu="true">
-    <origin xyz="0 0 0.5" rpy="0 0 0" />
+    <origin xyz="0 0 0.3" rpy="0 0 0" />
   </VLP-16>
 
   <!-- 1. 引入 Livox Mid-360 的宏定义文件 -->
