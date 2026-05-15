@@ -23,13 +23,25 @@
       </link>
     </model>
 
-    <!-- 2. 动态物体 (匀速运动的长方体) -->
-    <!-- 关键修改：将 model 改为 actor -->
-    <actor name="moving_obstacle">
-      <!-- actor 默认不受重力影响并按脚本移动，不需要 static 标签 -->
+    <!-- 2. 动态物体 (真实的物理模型 + ROS控制插件) -->
+    <model name="moving_obstacle">
+      <static>false</static>
       <pose>2.5 2.5 0.75 0 0 0</pose>
 
       <link name="link">
+        <!-- 必须关闭重力，防止它掉到地板下或与地面摩擦停滞 -->
+        <gravity>false</gravity> 
+        
+        <!-- 非静态模型必须包含惯性矩阵，否则 Gazebo 物理引擎会让它直接消失 -->
+        <inertial>
+          <mass>10.0</mass>
+          <inertia>
+            <ixx>1.0</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>1.0</iyy><iyz>0</iyz>
+            <izz>1.0</izz>
+          </inertia>
+        </inertial>
+
         <collision name="collision">
           <geometry><box><size>0.3 0.3 1.5</size></box></geometry>
         </collision>
@@ -43,44 +55,23 @@
         </visual>
       </link>
 
-      <!-- script 路径动画只对 actor 生效 -->
-      <script>
-        <loop>true</loop>
-        <delay_start>0</delay_start>
-        <auto_start>true</auto_start>
-        <trajectory id="0" type="linear">
-           <!-- 匀速逻辑：每段路程 5.0m，给定相同的时间间隔(5s)实现 1m/s 的匀速 -->
-           <waypoint>
-             <time>0.0</time>
-             <pose>2.5 2.5 0.75 0 0 0</pose>
-           </waypoint>
-           <waypoint>
-             <time>5.0</time>
-             <pose>2.5 -2.5 0.75 0 0 0</pose>
-           </waypoint>
-           <waypoint>
-             <time>10.0</time>
-             <pose>-2.5 -2.5 0.75 0 0 0</pose>
-           </waypoint>
-           <waypoint>
-             <time>15.0</time>
-             <pose>-2.5 2.5 0.75 0 0 0</pose>
-           </waypoint>
-           <waypoint>
-             <time>20.0</time>
-             <pose>2.5 2.5 0.75 0 0 0</pose>
-           </waypoint>
-        </trajectory>
-      </script>
-    </actor>
+      <!-- 使用平面移动插件，让我们可以通过 ROS 话题控制它 -->
+      <plugin name="obstacle_controller" filename="libgazebo_ros_planar_move.so">
+        <commandTopic>/obstacle_cmd_vel</commandTopic>
+        <odometryTopic>/obstacle_odom</odometryTopic>
+        <odometryFrame>odom_obstacle</odometryFrame>
+        <odometryRate>20.0</odometryRate>
+        <robotBaseFrame>link</robotBaseFrame>
+      </plugin>
+    </model>
 
     <!-- 3. 静态圆柱体 -->
     <model name="cylinder_1">
       <static>true</static>
       <pose>1 1 0.15 0 0 0</pose> 
       <link name="link">
-        <collision name="col"><geometry><cylinder><radius>0.3</radius><length>0.3</length></cylinder></geometry></collision>
-        <visual name="vis"><geometry><cylinder><radius>0.3</radius><length>0.3</length></cylinder></geometry><material><script><name>Gazebo/Blue</name></script></material></visual>
+        <collision name="col"><geometry><cylinder><radius>0.3</radius><length>0.8</length></cylinder></geometry></collision>
+        <visual name="vis"><geometry><cylinder><radius>0.3</radius><length>0.8</length></cylinder></geometry><material><script><name>Gazebo/Blue</name></script></material></visual>
       </link>
     </model>
 
@@ -88,8 +79,8 @@
       <static>true</static>
       <pose>-1 -2 0.15 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><cylinder><radius>0.3</radius><length>0.3</length></cylinder></geometry></collision>
-        <visual name="vis"><geometry><cylinder><radius>0.3</radius><length>0.3</length></cylinder></geometry><material><script><name>Gazebo/Blue</name></script></material></visual>
+        <collision name="col"><geometry><cylinder><radius>0.3</radius><length>0.8</length></cylinder></geometry></collision>
+        <visual name="vis"><geometry><cylinder><radius>0.3</radius><length>0.8</length></cylinder></geometry><material><script><name>Gazebo/Blue</name></script></material></visual>
       </link>
     </model>
 
