@@ -115,8 +115,7 @@ void LivoxOdeMultiRayShape::UpdateCallback(void *_data, dGeomID _o1, dGeomID _o2
             collision2 = static_cast<ODECollision*>(dGeomGetData(_o2));
         }
 
-        GZ_ASSERT(collision1, "collision1 is null");
-        GZ_ASSERT(collision2, "collision2 is null");
+        if (!collision1 || !collision2) return;
 
         ODECollision *rayCollision = NULL;
         ODECollision *hitCollision = NULL;

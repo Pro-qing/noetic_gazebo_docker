@@ -73,6 +73,7 @@ class LivoxPointsPlugin : public RayPlugin {
     virtual void OnNewLaserScans();
 
  private:
+    void InitRos();
     void InitializeRays(std::vector<std::pair<int, AviaRotateInfo>>& points_pair,
                         boost::shared_ptr<physics::LivoxOdeMultiRayShape>& ray_shape);
 
@@ -99,6 +100,8 @@ class LivoxPointsPlugin : public RayPlugin {
     int64_t maxPointSize = 1000;
     int64_t downSample = 1;
 
+    std::string rosTopicName;
+    bool rosInitialized = false;
     double maxDist = 400.0;
     double minDist = 0.1;
 };

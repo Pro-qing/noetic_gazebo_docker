@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  sensor_msgs
   tf
 )
 
@@ -26,7 +27,7 @@ include_directories(
 catkin_package(
         INCLUDE_DIRS include
         LIBRARIES livox_laser_simulation
-        CATKIN_DEPENDS tf
+        CATKIN_DEPENDS sensor_msgs tf
 )
 
 # 编译 Gazebo 插件动态库
