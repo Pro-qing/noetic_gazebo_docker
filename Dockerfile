@@ -3,6 +3,7 @@ FROM osrf/ros:noetic-desktop-full
 # 安装基础工具和 Gazebo 相关依赖
 RUN apt-get update && apt-get install -y \
     pkg-config \
+    gdb \
     python3-catkin-tools \
     ros-noetic-gazebo-ros-pkgs \
     ros-noetic-gazebo-ros-control \
