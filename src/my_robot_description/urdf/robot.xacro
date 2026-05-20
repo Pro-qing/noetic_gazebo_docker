@@ -80,6 +80,7 @@
     <joint name="${prefix}_wheel_joint" type="continuous">
       <parent link="base_link"/>
       <child link="${prefix}_wheel"/>
+      <!-- 轮子下沉 -0.05 使得底盘离地间隙合适 -->
       <origin xyz="-0.2 ${reflect * (base_width/2 + wheel_width/2)} -0.05" rpy="-1.5708 0 0"/>
       <axis xyz="0 0 1"/>
       <limit lower="-100" upper="100" effort="20" velocity="10"/>
@@ -169,13 +170,14 @@
     </gazebo>
   </xacro:macro>
 
+  <!-- 部署四个单线雷达 -->
   <xacro:corner_laser prefix="left"    x="0.5"  y="0.2"  z="0.075" yaw="0.785" />
   <xacro:corner_laser prefix="right"   x="0.5"  y="-0.2" z="0.075" yaw="-0.785" />
   <xacro:corner_laser prefix="bleft"   x="-0.5" y="0.2"  z="0.075" yaw="2.356" />
   <xacro:corner_laser prefix="bright"  x="-0.5" y="-0.2" z="0.075" yaw="-2.356" />
 
-  <!-- ============ 5. 16线激光雷达 (使用 GPU 版本 Velodyne 插件) ============ -->
-  <!-- <link name="velodyne_base_link">
+  <!-- ============ 5. 16线激光雷达 (中心偏前0.3m处) ============ -->
+  <link name="velodyne">
     <xacro:cylinder_inertial mass="0.83" radius="0.0516" length="0.0717"/>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -186,12 +188,13 @@
 
   <joint name="velodyne_base_mount_joint" type="fixed">
     <parent link="base_link"/>
-    <child link="velodyne_base_link"/>
-    <origin xyz="0.3 0 0.9" rpy="0 0 0"/>
+    <child link="velodyne"/>
+    <!-- 偏前0.3，置于底盘上方 z=0.8 处 -->
+    <origin xyz="0.3 0 0.8" rpy="0 0 0"/>
   </joint>
 
-  <gazebo reference="velodyne_base_link">
-    <sensor type="gpu_ray" name="velodyne-VLP16">
+  <gazebo reference="velodyne">
+    <sensor type="ray" name="velodyne-VLP16">
       <pose>0 0 0 0 0 0</pose>
       <visualize>false</visualize>
       <update_rate>10</update_rate>
@@ -217,16 +220,17 @@
       </ray>
       <plugin name="gazebo_ros_velodyne_laser" filename="libgazebo_ros_velodyne_laser.so">
         <topicName>/points_16</topicName>
-        <frameName>velodyne_base_link</frameName>
+        <frameName>velodyne</frameName>
         <organize_cloud>false</organize_cloud>
         <min_range>0.9</min_range>
         <max_range>130.0</max_range>
         <gaussianNoise>0.008</gaussianNoise>
       </plugin>
     </sensor>
-  </gazebo> -->
+  </gazebo>
 
-  <!-- ============ 6. Livox Mid-360 雷达 ============ -->
+  <!-- ============ 6. Livox Mid-360 雷达 (车头中心点偏后0.1m) ============ -->
+  <!-- 车辆总长1.0，中心为0，车头为0.5。往后偏0.1就是 x=0.4 -->
   <xacro:include filename="$(find livox_laser_simulation)/urdf/livox_mid360.xacro"/>
   <xacro:Livox_Mid40 name="livox" parent="base_link" xyz="0.4 0 0.45" rpy="3.1415926 0 0"/>
 
@@ -245,7 +249,7 @@
       <commandTopic>cmd_vel</commandTopic>
       <odometryTopic>odom</odometryTopic>
       <odometryFrame>odom</odometryFrame>
-      <robotBaseFrame>base_link</robotBaseFrame>
+      <robotBaseFrame>base_footprint</robotBaseFrame> <!-- 修改这里为 base_footprint -->
       <publishWheelTF>false</publishWheelTF>
       <publishOdomTF>true</publishOdomTF>
       <publishWheelJointState>true</publishWheelJointState>
