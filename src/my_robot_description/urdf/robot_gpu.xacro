@@ -1,0 +1,262 @@
+<?xml version="1.0"?>
+<robot name="my_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ============ 参数定义 ============ -->
+  <xacro:property name="base_width" value="0.4"/>
+  <xacro:property name="base_length" value="1.0"/>
+  <xacro:property name="base_height" value="0.1"/>
+  <xacro:property name="wheel_radius" value="0.1"/>
+  <xacro:property name="wheel_width" value="0.05"/>
+
+  <!-- ============ 惯性矩阵宏 ============ -->
+  <xacro:macro name="box_inertial" params="mass x y z">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${mass}"/>
+      <inertia ixx="${mass*(y*y+z*z)/12}" ixy="0" ixz="0"
+               iyy="${mass*(x*x+z*z)/12}" iyz="0"
+               izz="${mass*(x*x+y*y)/12}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="cylinder_inertial" params="mass radius length">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${mass}"/>
+      <inertia ixx="${mass*(3*radius*radius+length*length)/12}" ixy="0" ixz="0"
+               iyy="${mass*(3*radius*radius+length*length)/12}" iyz="0"
+               izz="${mass*radius*radius/2}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="sphere_inertial" params="mass radius">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${mass}"/>
+      <inertia ixx="${2*mass*radius*radius/5}" ixy="0" ixz="0"
+               iyy="${2*mass*radius*radius/5}" iyz="0"
+               izz="${2*mass*radius*radius/5}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- ============ base_footprint ============ -->
+  <link name="base_footprint"/>
+
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0.15" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ============ 1. 底盘 ============ -->
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="${base_length} ${base_width} ${base_height}"/></geometry>
+      <material name="blue"><color rgba="0 0 0.8 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="${base_length} ${base_width} ${base_height}"/></geometry>
+    </collision>
+    <xacro:box_inertial mass="5.0" x="${base_length}" y="${base_width}" z="${base_height}"/>
+  </link>
+
+  <!-- ============ 2. 轮子宏 ============ -->
+  <xacro:macro name="wheel" params="prefix reflect">
+    <link name="${prefix}_wheel">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><cylinder radius="${wheel_radius}" length="${wheel_width}"/></geometry>
+        <material name="black"><color rgba="0 0 0 1"/></material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><cylinder radius="${wheel_radius}" length="${wheel_width}"/></geometry>
+      </collision>
+      <xacro:cylinder_inertial mass="1.0" radius="${wheel_radius}" length="${wheel_width}"/>
+    </link>
+
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${prefix}_wheel"/>
+      <origin xyz="-0.2 ${reflect * (base_width/2 + wheel_width/2)} -0.05" rpy="-1.5708 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-100" upper="100" effort="20" velocity="10"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:wheel prefix="left" reflect="1"/>
+  <xacro:wheel prefix="right" reflect="-1"/>
+
+  <!-- ============ 3. 万向轮 ============ -->
+  <link name="caster_wheel">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><sphere radius="0.05"/></geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><sphere radius="0.05"/></geometry>
+    </collision>
+    <xacro:sphere_inertial mass="0.5" radius="0.05"/>
+  </link>
+
+  <joint name="caster_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="caster_wheel"/>
+    <origin xyz="0.4 0 -0.1" rpy="0 0 0"/>
+  </joint>
+
+  <gazebo reference="caster_wheel">
+    <mu1>0.0</mu1>
+    <mu2>0.0</mu2>
+  </gazebo>
+
+  <!-- ============ 4. 四个单线激光雷达 (GPU 加速版) ============ -->
+  <xacro:macro name="corner_laser" params="prefix x y z yaw">
+    <link name="${prefix}_laser_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><cylinder radius="0.03" length="0.05"/></geometry>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><cylinder radius="0.03" length="0.05"/></geometry>
+      </collision>
+      <xacro:cylinder_inertial mass="0.1" radius="0.03" length="0.05"/>
+    </link>
+
+    <joint name="${prefix}_laser_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="${prefix}_laser_link"/>
+      <origin xyz="${x} ${y} ${z}" rpy="0 0 ${yaw}"/>
+    </joint>
+
+    <gazebo reference="${prefix}_laser_link">
+      <!-- 【修改1】使用 gpu_ray -->
+      <sensor type="gpu_ray" name="${prefix}_hokuyo_sensor">
+        <pose>0 0 0 0 0 0</pose>
+        <visualize>false</visualize>
+        <update_rate>10</update_rate>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>720</samples>
+              <resolution>1</resolution>
+              <min_angle>-3.1415926</min_angle>
+              <max_angle>3.1415926</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.10</min>
+            <max>10.0</max>
+            <resolution>0.01</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.01</stddev>
+          </noise>
+        </ray>
+        <!-- 【修改2】调用 GPU 专属插件 libgazebo_ros_gpu_laser.so -->
+        <plugin name="gazebo_ros_${prefix}_laser" filename="libgazebo_ros_gpu_laser.so">
+          <topicName>/scan_${prefix}</topicName>
+          <frameName>${prefix}_laser_link</frameName>
+          <rosDebugLevel>na</rosDebugLevel>
+        </plugin>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- 部署四个单线雷达 -->
+  <xacro:corner_laser prefix="left"    x="0.5"  y="0.2"  z="0.075" yaw="0.785" />
+  <xacro:corner_laser prefix="right"   x="0.5"  y="-0.2" z="0.075" yaw="-0.785" />
+  <xacro:corner_laser prefix="bleft"   x="-0.5" y="0.2"  z="0.075" yaw="2.356" />
+  <xacro:corner_laser prefix="bright"  x="-0.5" y="-0.2" z="0.075" yaw="-2.356" />
+
+  <!-- ============ 5. 16线激光雷达 (GPU 加速版) ============ -->
+  <link name="velodyne">
+    <xacro:cylinder_inertial mass="0.83" radius="0.0516" length="0.0717"/>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><cylinder length="0.0717" radius="0.0516"/></geometry>
+      <material name="black"/>
+    </visual>
+  </link>
+
+  <joint name="velodyne_base_mount_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="velodyne"/>
+    <origin xyz="0.3 0 0.8" rpy="0 0 0"/>
+  </joint>
+
+  <gazebo reference="velodyne">
+    <sensor type="gpu_ray" name="velodyne-VLP16">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>10</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>440</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>16</samples>
+            <min_angle>-0.261799</min_angle>
+            <max_angle>0.261799</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>0.3</min>
+          <max>130.0</max>
+          <resolution>0.001</resolution>
+        </range>
+      </ray>
+      <plugin name="gazebo_ros_velodyne_laser" filename="libgazebo_ros_velodyne_gpu_laser.so">
+        <topicName>/points_16</topicName>
+        <frameName>velodyne</frameName>
+        <organize_cloud>false</organize_cloud>
+        <min_range>0.9</min_range>
+        <max_range>130.0</max_range>
+        <gaussianNoise>0.008</gaussianNoise>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- ============ 6. Livox Mid-360 雷达 ============ -->
+  <xacro:include filename="$(find livox_laser_simulation)/urdf/livox_mid360.xacro"/>
+  <xacro:Livox_Mid40 name="livox" parent="base_link" xyz="0.4 0 0.45" rpy="3.1415926 0 0"/>
+
+  <!-- ============ 7. 差速驱动底盘插件 ============ -->
+  <gazebo>
+    <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+      <legacyMode>false</legacyMode>
+      <rosDebugLevel>na</rosDebugLevel>
+      <alwaysOn>true</alwaysOn>
+      <updateRate>20</updateRate>
+      <leftJoint>left_wheel_joint</leftJoint>
+      <rightJoint>right_wheel_joint</rightJoint>
+      <wheelSeparation>${base_width + wheel_width}</wheelSeparation>
+      <wheelDiameter>${2 * wheel_radius}</wheelDiameter>
+      <torque>20</torque>
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryTopic>odom</odometryTopic>
+      <odometryFrame>odom</odometryFrame>
+      <robotBaseFrame>base_footprint</robotBaseFrame>
+      <publishWheelTF>false</publishWheelTF>
+      <publishOdomTF>true</publishOdomTF>
+      <publishWheelJointState>true</publishWheelJointState>
+      <wheelAcceleration>1.0</wheelAcceleration>
+      <wheelTorque>20</wheelTorque>
+      <odometrySource>world</odometrySource>
+      <publishTf>1</publishTf>
+    </plugin>
+  </gazebo>
+
+</robot>
