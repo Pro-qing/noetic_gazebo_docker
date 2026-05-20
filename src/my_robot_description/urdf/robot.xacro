@@ -175,7 +175,7 @@
   <xacro:corner_laser prefix="bright"  x="-0.5" y="-0.2" z="0.075" yaw="-2.356" />
 
   <!-- ============ 5. 16线激光雷达 (使用 GPU 版本 Velodyne 插件) ============ -->
-  <link name="velodyne_base_link">
+  <!-- <link name="velodyne_base_link">
     <xacro:cylinder_inertial mass="0.83" radius="0.0516" length="0.0717"/>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -224,7 +224,7 @@
         <gaussianNoise>0.008</gaussianNoise>
       </plugin>
     </sensor>
-  </gazebo>
+  </gazebo> -->
 
   <!-- ============ 6. Livox Mid-360 雷达 ============ -->
   <xacro:include filename="$(find livox_laser_simulation)/urdf/livox_mid360.xacro"/>
